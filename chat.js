@@ -7,14 +7,16 @@ $(function() {
 
   if(bot){
     generate_startMessage();
+    askBot();
     bot = false;
   }
 
   $("#chat-listen").click(function(e){
     e.preventDefault();
     var recognition = new webkitSpeechRecognition();
-    recognition.lang = "en-GB";
 
+    recognition.lang = document.querySelector('input[name="chat-lang"]:checked').value;
+    console.log(recognition.lang);
     recognition.onresult = function(event) {
         console.log(event);
         document.getElementById('chat-input').value += event.results[0][0].transcript;
@@ -26,11 +28,44 @@ $(function() {
 
   })
 
-  function submitText(e){
-    if(e.key == "ENTER"){
-      sendText(e);
-    }
+  function askBot(msg){
+
+    let url = 'http://127.0.0.1:5000';
+
+    fetch(url).then(function(response) {
+      return response.json();
+    }).then(function(data) {
+      console.log(data);
+    }).catch(function() {
+      console.log("Booo");
+    });
   }
+
+  async function postData(query) {
+    // Default options are marked with *
+    url = 'http://127.0.0.1:5000'
+    // let query = document.getElementById()
+    data = {"query" : query}
+    const response = await fetch(url, {
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+      mode: 'cors', // no-cors, *cors, same-origin
+      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: 'same-origin', // include, *same-origin, omit
+      headers: {
+        'Content-Type': 'application/json'
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      redirect: 'follow', // manual, *follow, error
+      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      body: JSON.stringify(data) // body data type must match "Content-Type" header
+    });
+    return response.json(); // parses JSON response into native JavaScript objects
+  }
+
+  postData()
+  .then((data) => {
+    console.log(data); // JSON data parsed by `data.json()` call
+  });
 
   $("#text-input-form").submit(function(e) {
     e.preventDefault();
@@ -62,20 +97,53 @@ $(function() {
         }
       ];
     setTimeout(function() {      
-      generate_message(msg, 'user');  
+
+      var botReply = postData(msg);
+      generate_message(botReply, 'user');  
     }, 1000)
     
   }
 
   function generate_startMessage(){
-    msg = "Hi, let me know if you need any help :)"
-    generate_message(msg,'user')
+    msg = "Please Select language Preference"
+
+    type = "user"
+    INDEX++;
+    var str="";
+    str += "<div id='cm-msg-"+INDEX+"' class=\"chat-msg "+type+"\">";
+    str += "          <div class=\"msg-avatar\">";
+    str += "            <i class=\"material-icons\" >account_circle</i>";
+    str += "          <\/div>";
+    str += "          <div class=\"cm-msg-text\">";
+    str += msg;
+    
+    str += " <br><input type='radio' name = 'chat-lang' value = 'en-IN' checked = 'checked'>";
+    str += " <label> English </label>";
+
+    str += " <br><input type='radio' name = 'chat-lang' value = 'hi-IN'>"; 
+    str += " <label> Hindi </label>";
+    
+    str += " <br><input type='radio' name = 'chat-lang' value = 'ta-IN'>"; 
+    str += " <label> Tamil </label>";
+
+    str += "          <\/div>";
+    str += "        <\/div>";
+    $(".chat-logs").append(str);
+    $("#cm-msg-"+INDEX).hide().fadeIn(300);
+    if(type == 'self'){
+     $("#chat-input").val(''); 
+    }    
+    $(".chat-logs").stop().animate({ scrollTop: $(".chat-logs")[0].scrollHeight}, 1000);    
 
   }
   
   function generate_message(msg, type) {
     INDEX++;
     var str="";
+
+    
+
+
     str += "<div id='cm-msg-"+INDEX+"' class=\"chat-msg "+type+"\">";
     str += "          <div class=\"msg-avatar\">";
     str += "            <i class=\"material-icons\" >account_circle</i>";
@@ -86,6 +154,10 @@ $(function() {
     str += "        <\/div>";
     $(".chat-logs").append(str);
     $("#cm-msg-"+INDEX).hide().fadeIn(300);
+    
+    
+    
+    
     if(type == 'self'){
      $("#chat-input").val(''); 
     }    
