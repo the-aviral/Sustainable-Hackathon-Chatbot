@@ -1,5 +1,5 @@
 // generate_startMessage();
-
+// A wild one appeared
 var bot = true
 
 $(function() {
@@ -10,9 +10,40 @@ $(function() {
     bot = false;
   }
 
-  $("#chat-submit").click(function(e) {
+  $("#chat-listen").click(function(e){
+    e.preventDefault();
+    var recognition = new webkitSpeechRecognition();
+    recognition.lang = "en-GB";
+
+    recognition.onresult = function(event) {
+        console.log(event);
+        document.getElementById('chat-input').value += event.results[0][0].transcript;
+        sendText(e);
+
+    }
+    recognition.start();
+
+
+  })
+
+  function submitText(e){
+    if(e.key == "ENTER"){
+      sendText(e);
+    }
+  }
+
+  $("#text-input-form").submit(function(e) {
+    e.preventDefault();
+    console.log(e)
+    sendText(e);
+});
+
+
+  function sendText(e) {
+    console.log(e)
     e.preventDefault();
 
+    
     
 
     var msg = $("#chat-input").val(); 
@@ -34,7 +65,7 @@ $(function() {
       generate_message(msg, 'user');  
     }, 1000)
     
-  })
+  }
 
   function generate_startMessage(){
     msg = "Hi, let me know if you need any help :)"
