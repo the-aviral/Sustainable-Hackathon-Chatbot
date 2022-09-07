@@ -62,24 +62,16 @@ $(function() {
     return response.json(); // parses JSON response into native JavaScript objects
   }
 
-  postData()
-  .then((data) => {
-    console.log(data); // JSON data parsed by `data.json()` call
-  });
+  
 
   $("#text-input-form").submit(function(e) {
     e.preventDefault();
-    console.log(e)
     sendText(e);
 });
 
 
   function sendText(e) {
-    console.log(e)
     e.preventDefault();
-
-    
-    
 
     var msg = $("#chat-input").val(); 
     if(msg.trim() == ''){
@@ -98,8 +90,17 @@ $(function() {
       ];
     setTimeout(function() {      
 
-      var botReply = postData(msg);
-      generate_message(botReply, 'user');  
+      var cheatRes;
+      var botReply = postData(msg)
+      .then((data) => {
+        console.log(data['data']);
+        generate_message(data['data'], 'user');  
+
+        cheatRes = data['data']; // JSON data parsed by `data.json()` call
+      });
+      console.log(msg)
+      console.log(cheatRes)
+      // generate_message(botReply, 'user');  
     }, 1000)
     
   }

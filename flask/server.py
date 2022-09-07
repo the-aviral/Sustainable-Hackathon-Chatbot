@@ -11,8 +11,11 @@ def home():
         print(request.args)
         data = "request"
     if(request.method == 'POST'):
-        data = request.get_json()
-        print()
+        try:
+            data = request.get_json()['query'] + "de-gozaru"
+        except:
+            data = ""
+    print(data)
     return jsonify({'data': data})
 
 if __name__ == '__main__':
